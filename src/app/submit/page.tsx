@@ -1,3 +1,5 @@
+"use client";
+
 import { SubmitFortuneForm } from '@/components/submit-fortune-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Send } from 'lucide-react';
