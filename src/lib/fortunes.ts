@@ -14,7 +14,27 @@ export let fortunes: string[] = [
   "Today is a good day to try something new.",
   "A dream you have will come true.",
   "Share your happiness with others today.",
-  "Hard work will pay off sooner than you think."
+  "Hard work will pay off sooner than you think.",
+  "Every day is a new beginning. Take a deep breath and start again.",
+  "Kindness is a language which the deaf can hear and the blind can see.",
+  "The best way to predict the future is to create it.",
+  "You are capable of amazing things.",
+  "A smile is a curve that sets everything straight.",
+  "Opportunity dances with those already on the dance floor.",
+  "Your talents will be recognized and rewarded.",
+  "Do not be afraid to explore new paths.",
+  "The wise man is the one who knows what he does not know.",
+  "A faithful friend is a strong defense.",
+  "Simplicity is the ultimate sophistication.",
+  "Happiness is not by chance, but by choice.",
+  "You will soon embark on a delightful journey.",
+  "Let your actions speak louder than your words.",
+  "The world is full of magical things, patiently waiting for our senses to grow sharper.",
+  "A new perspective will come with the new year.",
+  "Your ability to find the good in others will guide you.",
+  "An admirer is concealing their affection for you.",
+  "Generosity will return to you in unexpected ways.",
+  "Embrace the unknown; it holds wonderful surprises."
 ];
 
 export function addFortune(newFortune: string): void {
