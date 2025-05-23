@@ -11,22 +11,30 @@ type Fortune = {
 };
 
 export default function HomePage() {
-  const [fortune, setFortune] = useState<Fortune | null>(null);
+  const [fortunes, setFortunes] = useState<Fortune[]>([]);
+  const [currentFortune, setCurrentFortune] = useState<Fortune | null>(null);
 
-  const fetchAndSetFortune = async () => {
+  const fetchFortunes = async () => {
     try {
       const response = await fetch('/api/fortune');
       const data = await response.json();
-      setFortune(data);
+      setFortunes(data);
+      if (data.length > 0) {
+        setCurrentFortune(data[Math.floor(Math.random() * data.length)]);
+      }
     } catch (error) {
       console.error('Error fetching fortune:', error);
     }
   };
 
+  const generateNewFortune = () => {
+    if (fortunes.length > 0) {
+      setCurrentFortune(fortunes[Math.floor(Math.random() * fortunes.length)]);
+    }
+  };
   useEffect(() => {
-    fetchAndSetFortune();
+    fetchFortunes();
   }, []);
-
   return (
     <div className="space-y-8">
       <section className="text-center py-8">
@@ -44,10 +52,10 @@ export default function HomePage() {
           <CardDescription>A little piece of wisdom, just for you.</CardDescription>
         </CardHeader>
         <CardContent>
-          {fortune ? (
-            <FortuneDisplay fortune={fortune} />
+          {currentFortune ? (
+            <FortuneDisplay fortune={currentFortune} />
           ) : (
-            <p>Loading fortune...</p>
+            <p>Click "Generate New Fortune" to see your fortune!</p>
           )}
           <div className="mt-4">
             <Button onClick={fetchAndSetFortune}>Generate New Fortune</Button>
