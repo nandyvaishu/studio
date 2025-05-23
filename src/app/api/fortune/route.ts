@@ -1,8 +1,1 @@
-import { NextResponse } from 'next/server';
-import { fortunes } from '@/lib/fortunes';
-
-export async function GET() {
-  if (fortunes.length === 0) {
-    return NextResponse.json({ fortunes: [] });
-  }
- return NextResponse.json({ fortunes: fortunes });
+*   **`--no-cache`:** This flag is added to prevent Docker from using cached layers during the build process. This ensures that all steps, including copying your latest code, are executed.
