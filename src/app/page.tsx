@@ -16,6 +16,7 @@ export default function HomePage() {
   
   const fetchFortunes = async () => {
     try {
+      const response = await fetch('/api/fortune');
       const data = await response.json();
       setFortunes(data);
       if (data.length > 0) {
