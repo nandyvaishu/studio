@@ -1,8 +1,19 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { FortuneDisplay } from '@/components/fortune-display';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+type Fortune = {
+  id: string;
+  message: string;
+  style: string;
+};
+
 export default function HomePage() {
-  return (
+  const [fortune, setFortune] = useState<Fortune | null>(null);
+  const fetchFortune = async () => {
     <div className="space-y-8">
       <section className="text-center py-8">
         <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
@@ -19,9 +30,26 @@ export default function HomePage() {
           <CardDescription>A little piece of wisdom, just for you.</CardDescription>
         </CardHeader>
         <CardContent>
-          <FortuneDisplay />
+          {fortune ? (
+            <FortuneDisplay initialFortune={fortune} />
+          ) : (
+            <p>Loading fortune...</p>
+          )}
+          <div className="mt-4">
+            <Button onClick={fetchFortune}>Generate New Fortune</Button>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
+
+  useEffect(() => {
+    fetchFortune();
+  }, []);
+
+  return (
+    fetchFortune()
+  );
 }
+
+

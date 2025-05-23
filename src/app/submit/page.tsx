@@ -1,8 +1,11 @@
 import { SubmitFortuneForm } from '@/components/submit-fortune-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Send } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function SubmitPage() {
+  const router = useRouter();
+
   return (
     <div className="space-y-8">
       <header className="text-center">
@@ -23,7 +26,7 @@ export default function SubmitPage() {
           <CardDescription>Your fortune might inspire someone today. (Submissions are currently for demo purposes)</CardDescription>
         </CardHeader>
         <CardContent>
-          <SubmitFortuneForm />
+          <SubmitFortuneForm onSubmitSuccess={() => router.push('/')} />
         </CardContent>
       </Card>
     </div>
