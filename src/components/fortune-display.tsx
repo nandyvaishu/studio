@@ -2,42 +2,38 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation'; // Import useSearchParams and useRouter
+// REMOVED: import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface FortuneResponse {
-  fortune: string;
+interface ApiResponse {
+  fortunes: string[];
 }
 
 export function FortuneDisplay() {
   const [fortune, setFortune] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  // REMOVED: searchParams and router hooks
 
-  const fetchFortune = useCallback(async (specificFortune?: string | null) => {
+  const fetchFortune = useCallback(async () => { // REMOVED: specificFortune parameter
     setIsLoading(true);
     setError(null);
-    // Clear the query parameter from URL if we are fetching a new random fortune
-    // or if a specific one was displayed and now we fetch another.
-    if (searchParams.has('newFortune') && !specificFortune) {
-      router.replace('/', { scroll: false });
-    }
+    // REMOVED: router.replace logic
 
     try {
-      if (specificFortune) {
-        setFortune(specificFortune);
+      // REMOVED: if (specificFortune) block
+      const response = await fetch('/api/fortune');
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+      const data: ApiResponse = await response.json();
+      if (data.fortunes && data.fortunes.length > 0) {
+        setFortune(data.fortunes[Math.floor(Math.random() * data.fortunes.length)]);
       } else {
-        const response = await fetch('/api/fortune');
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        const data: FortuneResponse = await response.json();
-        setFortune(data.fortune);
+        setFortune("No fortunes available at the moment.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch fortune.');
@@ -45,20 +41,15 @@ export function FortuneDisplay() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchParams, router]);
+  }, []); // REMOVED: dependencies on searchParams, router
 
   useEffect(() => {
-    const newFortuneFromQuery = searchParams.get('newFortune');
-    if (newFortuneFromQuery) {
-      fetchFortune(newFortuneFromQuery);
-    } else {
-      fetchFortune();
-    }
-  }, [fetchFortune, searchParams]); // searchParams dependency added to refetch if it changes externally.
+    // REMOVED: Logic to read newFortune from query parameters
+    fetchFortune();
+  }, [fetchFortune]); // REMOVED: dependency on searchParams
 
   const handleNewFortuneClick = () => {
-    // When "New Fortune" is clicked, always fetch a random one, ignoring any query param.
-    fetchFortune(null);
+    fetchFortune(); // Call without null, as specificFortune param is removed
   };
 
   return (
@@ -108,3 +99,4 @@ export function FortuneDisplay() {
     </div>
   );
 }
+

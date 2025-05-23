@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter
+// useRouter is no longer needed here
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,11 +10,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
 import { addFortune } from '@/lib/fortunes';
 
-export function SubmitFortuneForm() {
+interface SubmitFortuneFormProps {
+  onSubmitSuccess?: () => void;
+}
+
+export function SubmitFortuneForm({ onSubmitSuccess }: SubmitFortuneFormProps) {
   const [newFortune, setNewFortune] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const router = useRouter(); // Initialize useRouter
+  // router is removed
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,21 +34,21 @@ export function SubmitFortuneForm() {
     setIsSubmitting(true);
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500)); // Reduced timeout slightly
+    await new Promise(resolve => setTimeout(resolve, 500)); 
 
     const trimmedFortune = newFortune.trim();
     addFortune(trimmedFortune);
 
     toast({
       title: "Fortune Submitted!",
-      description: "Redirecting to display your wisdom...",
+      description: "It's now in the mix for random generation.", // Reverted toast message
     });
 
     setNewFortune('');
     setIsSubmitting(false);
 
-    // Redirect to homepage with the new fortune as a query parameter
-    router.push(`/?newFortune=${encodeURIComponent(trimmedFortune)}`);
+    // router.push is removed, onSubmitSuccess is called instead
+    onSubmitSuccess?.();
   };
 
   return (
@@ -72,3 +76,4 @@ export function SubmitFortuneForm() {
     </form>
   );
 }
+
