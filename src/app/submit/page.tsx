@@ -1,3 +1,4 @@
+
 "use client";
 
 import { SubmitFortuneForm } from '@/components/submit-fortune-form';
@@ -25,10 +26,14 @@ export default function SubmitPage() {
       <Card className="max-w-2xl mx-auto shadow-lg">
         <CardHeader>
           <CardTitle>Submit a New Fortune</CardTitle>
-          <CardDescription>Your fortune might inspire someone today. (Submissions are currently for demo purposes)</CardDescription>
+          <CardDescription>Your fortune might inspire someone today.</CardDescription>
         </CardHeader>
         <CardContent>
-          <SubmitFortuneForm onSubmitSuccess={() => router.push('/')} />
+          <SubmitFortuneForm 
+            onSubmitSuccess={(submittedFortune) => {
+              router.push(`/?newFortune=${encodeURIComponent(submittedFortune)}`);
+            }} 
+          />
         </CardContent>
       </Card>
     </div>

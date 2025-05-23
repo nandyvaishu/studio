@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-// useRouter is no longer needed here
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,14 +10,13 @@ import { Send } from 'lucide-react';
 import { addFortune } from '@/lib/fortunes';
 
 interface SubmitFortuneFormProps {
-  onSubmitSuccess?: () => void;
+  onSubmitSuccess?: (submittedFortune: string) => void;
 }
 
 export function SubmitFortuneForm({ onSubmitSuccess }: SubmitFortuneFormProps) {
   const [newFortune, setNewFortune] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  // router is removed
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,14 +39,13 @@ export function SubmitFortuneForm({ onSubmitSuccess }: SubmitFortuneFormProps) {
 
     toast({
       title: "Fortune Submitted!",
-      description: "It's now in the mix for random generation.", // Reverted toast message
+      description: "It's now in the mix and you'll be redirected.",
     });
 
     setNewFortune('');
     setIsSubmitting(false);
 
-    // router.push is removed, onSubmitSuccess is called instead
-    onSubmitSuccess?.();
+    onSubmitSuccess?.(trimmedFortune);
   };
 
   return (
@@ -76,4 +73,3 @@ export function SubmitFortuneForm({ onSubmitSuccess }: SubmitFortuneFormProps) {
     </form>
   );
 }
-
