@@ -1,0 +1,32 @@
+# Git files
+.git
+.gitignore
+
+# Node modules
+node_modules
+
+# Next.js build output (generated inside Docker)
+.next
+
+# Turbopack cache
+.turbo
+
+# Development environment files
+.env
+.env*.local
+*.log
+
+# Editor-specific files
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
