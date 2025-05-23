@@ -45,7 +45,8 @@ const rewriteFortuneFlow = ai.defineFlow(
     const response = await prompt(input);
     if (!response.output) {
       console.error('Genkit prompt for rewriteFortuneFlow did not return an output. Full response:', JSON.stringify(response, null, 2));
-      throw new Error('The AI failed to rewrite the fortune. No output was received from the model.');
+      // Include more details from the response in the error message
+      throw new Error(`The AI failed to rewrite the fortune. No output was received from the model. Response details: ${JSON.stringify(response, null, 2)}`);
     }
     return response.output;
   }
