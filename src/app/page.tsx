@@ -23,14 +23,14 @@ export default function HomePage() {
   const fetchFortunes = useCallback(async () => {
     setIsLoadingFortunes(true);
     try {
-      const response = await fetch('/api/fortune');
+      const response = await fetch('/api/fortune', { cache: 'no-store' }); // Ensure fresh data
       const responseData = await response.json();
       const data: string[] = responseData.fortunes;
 
       const mappedFortunes: Fortune[] = data.map((msg, index) => ({
         id: `api-fortune-${index}-${Date.now()}`,
         message: msg,
-        style: 'Classic Wisdom' 
+        style: 'Classic Wisdom'
       }));
       setFortunes(mappedFortunes);
 
