@@ -23,6 +23,10 @@ export default function HomePage() {
     }
   };
 
+  useEffect(() => {
+    fetchAndSetFortune();
+  }, []);
+
   return (
     <div className="space-y-8">
       <section className="text-center py-8">
@@ -53,7 +57,3 @@ export default function HomePage() {
     </div>
   );
 }
-;
-useEffect(() => {
-  fetchAndSetFortune();
-}, []);
