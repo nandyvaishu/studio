@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +14,7 @@ export function SubmitFortuneForm() {
   const [newFortune, setNewFortune] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const router = useRouter(); // Initialize useRouter
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,17 +30,21 @@ export function SubmitFortuneForm() {
     setIsSubmitting(true);
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced timeout for quicker feedback
+    await new Promise(resolve => setTimeout(resolve, 500)); // Reduced timeout slightly
 
-    addFortune(newFortune.trim());
+    const trimmedFortune = newFortune.trim();
+    addFortune(trimmedFortune);
 
     toast({
-      title: "Fortune Added!",
-      description: "Your wisdom is now in the mix! Try fetching a new fortune.",
+      title: "Fortune Submitted!",
+      description: "Redirecting to display your wisdom...",
     });
 
     setNewFortune('');
     setIsSubmitting(false);
+
+    // Redirect to homepage with the new fortune as a query parameter
+    router.push(`/?newFortune=${encodeURIComponent(trimmedFortune)}`);
   };
 
   return (

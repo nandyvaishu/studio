@@ -1,6 +1,8 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation'; // Import useSearchParams and useRouter
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
@@ -14,28 +16,50 @@ export function FortuneDisplay() {
   const [fortune, setFortune] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const fetchFortune = useCallback(async () => {
+  const fetchFortune = useCallback(async (specificFortune?: string | null) => {
     setIsLoading(true);
     setError(null);
+    // Clear the query parameter from URL if we are fetching a new random fortune
+    // or if a specific one was displayed and now we fetch another.
+    if (searchParams.has('newFortune') && !specificFortune) {
+      router.replace('/', { scroll: false });
+    }
+
     try {
-      const response = await fetch('/api/fortune');
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      if (specificFortune) {
+        setFortune(specificFortune);
+      } else {
+        const response = await fetch('/api/fortune');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        const data: FortuneResponse = await response.json();
+        setFortune(data.fortune);
       }
-      const data: FortuneResponse = await response.json();
-      setFortune(data.fortune);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch fortune.');
       setFortune(null);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [searchParams, router]);
 
   useEffect(() => {
-    fetchFortune();
-  }, [fetchFortune]);
+    const newFortuneFromQuery = searchParams.get('newFortune');
+    if (newFortuneFromQuery) {
+      fetchFortune(newFortuneFromQuery);
+    } else {
+      fetchFortune();
+    }
+  }, [fetchFortune, searchParams]); // searchParams dependency added to refetch if it changes externally.
+
+  const handleNewFortuneClick = () => {
+    // When "New Fortune" is clicked, always fetch a random one, ignoring any query param.
+    fetchFortune(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -61,7 +85,7 @@ export function FortuneDisplay() {
           )}
         </CardContent>
         <CardFooter>
-          <Button onClick={fetchFortune} disabled={isLoading} variant="outline" className="gap-2">
+          <Button onClick={handleNewFortuneClick} disabled={isLoading} variant="outline" className="gap-2">
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             New Fortune
           </Button>
