@@ -27,12 +27,6 @@ export default function HomePage() {
     }
   };
 
-  const generateNewFortune = () => {
-
-  const generateNewFortune = () => {
-    if (fortunes.length > 0) {
-      setCurrentFortune(fortunes[Math.floor(Math.random() * fortunes.length)]);
-    }
   };
   useEffect(() => {
     fetchFortunes();
