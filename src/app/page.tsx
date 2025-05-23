@@ -19,7 +19,8 @@ export default function HomePage() {
       const response = await fetch('/api/fortune');
       const responseData = await response.json();
       const data = responseData.fortunes; // Access the fortunes array
-      setFortunes(data);      if (data && data.length > 0) {
+      setFortunes(data);
+      if (data && data.length > 0) {
 
         setCurrentFortune(data[Math.floor(Math.random() * data.length)]);
       }
