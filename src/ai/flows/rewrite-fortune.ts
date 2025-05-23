@@ -1,11 +1,8 @@
-
-// src/ai/flows/rewrite-fortune.ts
 'use server';
-
 /**
- * @fileOverview Rewrites a fortune in a different style.
+ * @fileOverview A Genkit flow to rewrite a given fortune cookie message in a specified style.
  *
- * - rewriteFortune - A function that rewrites the fortune in a different style.
+ * - rewriteFortune - A function that takes a fortune and a style, and returns the rewritten fortune.
  * - RewriteFortuneInput - The input type for the rewriteFortune function.
  * - RewriteFortuneOutput - The return type for the rewriteFortune function.
  */
@@ -14,13 +11,13 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const RewriteFortuneInputSchema = z.object({
-  fortune: z.string().describe('The original fortune message.'),
-  style: z.string().describe('The style to rewrite the fortune in (e.g., humorous, philosophical, cryptic).'),
+  fortune: z.string().describe('The original fortune cookie message to be rewritten.'),
+  style: z.string().describe('The style in which the fortune should be rewritten (e.g., Humorous, Philosophical, Cryptic).'),
 });
 export type RewriteFortuneInput = z.infer<typeof RewriteFortuneInputSchema>;
 
 const RewriteFortuneOutputSchema = z.object({
-  rewrittenFortune: z.string().describe('The rewritten fortune message in the specified style.'),
+  rewrittenFortune: z.string().describe('The fortune cookie message rewritten in the specified style.'),
 });
 export type RewriteFortuneOutput = z.infer<typeof RewriteFortuneOutputSchema>;
 
@@ -28,11 +25,15 @@ export async function rewriteFortune(input: RewriteFortuneInput): Promise<Rewrit
   return rewriteFortuneFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const rewriteFortunePrompt = ai.definePrompt({
   name: 'rewriteFortunePrompt',
   input: {schema: RewriteFortuneInputSchema},
   output: {schema: RewriteFortuneOutputSchema},
-  prompt: `Rewrite the following fortune message in a {{{style}}} style:\n\nOriginal Fortune: {{{fortune}}}`,
+  prompt: `Rewrite the following fortune cookie message in a {{style}} style.
+Fortune: "{{fortune}}"
+
+Ensure the rewritten fortune is concise and captures the essence of the original, but adapted to the requested style.
+`,
 });
 
 const rewriteFortuneFlow = ai.defineFlow(
@@ -41,13 +42,11 @@ const rewriteFortuneFlow = ai.defineFlow(
     inputSchema: RewriteFortuneInputSchema,
     outputSchema: RewriteFortuneOutputSchema,
   },
-  async (input): Promise<RewriteFortuneOutput> => {
-    const response = await prompt(input);
-    if (!response.output) {
-      console.error('Genkit prompt for rewriteFortuneFlow did not return an output. Full response:', JSON.stringify(response, null, 2));
-      // Include more details from the response in the error message
-      throw new Error(`The AI failed to rewrite the fortune. No output was received from the model. Response details: ${JSON.stringify(response, null, 2)}`);
+  async (input) => {
+    const {output} = await rewriteFortunePrompt(input);
+    if (!output) {
+      throw new Error('The AI model did not return an output for rewriting the fortune.');
     }
-    return response.output;
+    return output;
   }
 );
