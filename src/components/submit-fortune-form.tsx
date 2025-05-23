@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -6,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
+import { addFortune } from '@/lib/fortunes';
 
 export function SubmitFortuneForm() {
   const [newFortune, setNewFortune] = useState('');
@@ -26,13 +28,13 @@ export function SubmitFortuneForm() {
     setIsSubmitting(true);
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced timeout for quicker feedback
 
-    console.log('Submitted fortune:', newFortune); // In a real app, send this to a backend
+    addFortune(newFortune.trim());
 
     toast({
-      title: "Fortune Submitted!",
-      description: "Thank you for sharing your wisdom. (This is a demo submission)",
+      title: "Fortune Added!",
+      description: "Your wisdom is now in the mix! Try fetching a new fortune.",
     });
 
     setNewFortune('');

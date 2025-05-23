@@ -1,4 +1,5 @@
-export const fortunes: string[] = [
+
+export let fortunes: string[] = [
   "A beautiful adventure awaits you.",
   "Good things come to those who wait, but better things come to those who go out and get them.",
   "Your creativity will shine today. Embrace it!",
@@ -15,3 +16,9 @@ export const fortunes: string[] = [
   "Share your happiness with others today.",
   "Hard work will pay off sooner than you think."
 ];
+
+export function addFortune(newFortune: string): void {
+  if (newFortune && !fortunes.includes(newFortune)) {
+    fortunes.push(newFortune);
+  }
+}
