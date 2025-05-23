@@ -1,3 +1,4 @@
+
 // src/ai/flows/rewrite-fortune.ts
 'use server';
 
@@ -40,8 +41,12 @@ const rewriteFortuneFlow = ai.defineFlow(
     inputSchema: RewriteFortuneInputSchema,
     outputSchema: RewriteFortuneOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input): Promise<RewriteFortuneOutput> => {
+    const response = await prompt(input);
+    if (!response.output) {
+      console.error('Genkit prompt for rewriteFortuneFlow did not return an output. Full response:', JSON.stringify(response, null, 2));
+      throw new Error('The AI failed to rewrite the fortune. No output was received from the model.');
+    }
+    return response.output;
   }
 );
