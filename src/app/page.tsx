@@ -21,10 +21,11 @@ export default function HomePage() {
       console.log('Fetched fortune data:', responseData); // Log fetched data
       const data = responseData.fortunes; // Access the fortunes array
 
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) { 
  setFortunes(data);
+        console.log('Fortunes state after setting:', fortunes);
 
-
+        const initialFortune = data[Math.floor(Math.random() * data.length)];
         setCurrentFortune(data[Math.floor(Math.random() * data.length)]);
       }
     } catch (error) {
@@ -33,6 +34,7 @@ export default function HomePage() {
   };
 
   const generateNewFortune = () => {
+    console.log('Fortunes state in generateNewFortune:', fortunes);
     if (fortunes.length > 0) {
       setCurrentFortune(fortunes[Math.floor(Math.random() * fortunes.length)]);
     }
