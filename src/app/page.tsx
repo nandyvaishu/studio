@@ -26,7 +26,7 @@ export default function HomePage() {
         console.log('Fortunes state after setting:', fortunes);
 
         const initialFortune = data[Math.floor(Math.random() * data.length)];
-        setCurrentFortune(data[Math.floor(Math.random() * data.length)]);
+        setCurrentFortune(initialFortune); // Set currentFortune AFTER setting fortunes state
       }
     } catch (error) {
       console.error('Error fetching fortune:', error);
