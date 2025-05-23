@@ -6,13 +6,3 @@ export async function GET() {
     return NextResponse.json({ fortunes: [] });
   }
  return NextResponse.json({ fortunes: fortunes });
-}
-import { NextResponse } from 'next/server';
-import { fortunes } from '@/lib/fortunes';
-
-export async function GET() {
-  if (fortunes.length === 0) {
-    return NextResponse.json({ fortunes: [] });
-  }
- return NextResponse.json({ fortunes: fortunes });
-}
