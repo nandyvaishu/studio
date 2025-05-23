@@ -13,10 +13,9 @@ type Fortune = {
 export default function HomePage() {
   const [fortunes, setFortunes] = useState<Fortune[]>([]);
   const [currentFortune, setCurrentFortune] = useState<Fortune | null>(null);
-
+  
   const fetchFortunes = async () => {
     try {
-      const response = await fetch('/api/fortune');
       const data = await response.json();
       setFortunes(data);
       if (data.length > 0) {
@@ -27,17 +26,7 @@ export default function HomePage() {
     }
   };
 
-  const fetchAndSetFortune = async () => {
-    try {
-      const response = await fetch('/api/fortune');
-      const data = await response.json();
-      setFortunes(data);
-      if (data.length > 0) {
-        setCurrentFortune(data[Math.floor(Math.random() * data.length)]);
-      }
-    } catch (error) {
-      console.error('Error fetching fortune:', error);
-    }
+  const generateNewFortune = () => {
 
   const generateNewFortune = () => {
     if (fortunes.length > 0) {
@@ -70,7 +59,7 @@ export default function HomePage() {
             <p>Click "Generate New Fortune" to see your fortune!</p>
           )}
           <div className="mt-4">
-            <Button onClick={fetchAndSetFortune}>Generate New Fortune</Button>
+            <Button onClick={generateNewFortune}>Generate New Fortune</Button>
           </div>
         </CardContent>
       </Card>
