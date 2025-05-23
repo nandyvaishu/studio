@@ -1,7 +1,48 @@
+'use client';
+import { useEffect, useState } from 'react';
 import { FortuneDisplay } from '@/components/fortune-display';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+type Fortune = {
+  id: string;
+  message: string;
+  style: string;
+};
+
 export default function HomePage() {
+  const [fortunes, setFortunes] = useState<Fortune[]>([]);
+  const [currentFortune, setCurrentFortune] = useState<Fortune | null>(null);
+  
+  const fetchFortunes = async () => {
+    try {
+      const response = await fetch('/api/fortune');
+      const responseData = await response.json();
+      console.log('Fetched fortune data:', responseData); // Log fetched data
+      const data = responseData.fortunes; // Access the fortunes array
+
+      if (Array.isArray(data) && data.length > 0) { 
+ setFortunes(data);
+        console.log('Fortunes state after setting:', fortunes);
+
+        const initialFortune = data[Math.floor(Math.random() * data.length)];
+        setCurrentFortune(data[Math.floor(Math.random() * data.length)]);
+      }
+    } catch (error) {
+      console.error('Error fetching fortune:', error);
+    }
+  };
+
+  const generateNewFortune = () => {
+    console.log('Fortunes state in generateNewFortune:', fortunes);
+    if (fortunes.length > 0) {
+      setCurrentFortune(fortunes[Math.floor(Math.random() * fortunes.length)]);
+    }
+  };
+
+  useEffect(() => {
+    fetchFortunes();
+  }, []);
   return (
     <div className="space-y-8">
       <section className="text-center py-8">
@@ -19,7 +60,14 @@ export default function HomePage() {
           <CardDescription>A little piece of wisdom, just for you.</CardDescription>
         </CardHeader>
         <CardContent>
-          <FortuneDisplay />
+          {currentFortune ? (
+            <FortuneDisplay fortune={currentFortune} />
+          ) : (
+            <p>Click "Generate New Fortune" to see your fortune!</p>
+          )}
+          <div className="mt-4">
+            <Button onClick={generateNewFortune}>Generate New Fortune</Button>
+          </div>
         </CardContent>
       </Card>
     </div>
