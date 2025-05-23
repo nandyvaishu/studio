@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { FortuneDisplay } from '@/components/fortune-display';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,18 @@ type Fortune = {
 };
 
 export default function HomePage() {
+  const [fortune, setFortune] = useState<Fortune | null>(null);
+
+  const fetchAndSetFortune = async () => {
+    try {
+      const response = await fetch('/api/fortune');
+      const data = await response.json();
+      setFortune(data);
+    } catch (error) {
+      console.error('Error fetching fortune:', error);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <section className="text-center py-8">
@@ -42,18 +53,7 @@ export default function HomePage() {
     </div>
   );
 }
-
-const [fortune, setFortune] = useState<Fortune | null>(null);
-const fetchAndSetFortune = async () => {
-  try {
-    const response = await fetch('/api/fortune');
-    const data = await response.json();
-    setFortune(data);
-  } catch (error) {
-    console.error('Error fetching fortune:', error);
-  }
-};
-
+;
 useEffect(() => {
   fetchAndSetFortune();
 }, []);
