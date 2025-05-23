@@ -26,11 +26,8 @@ export default function HomePage() {
       console.error('Error fetching fortune:', error);
     }
   };
-
-  };
-  useEffect(() => {
-    fetchFortunes();
-  }, []);
+ const generateNewFortune = () => {
+ if (fortunes.length > 0) { setCurrentFortune(fortunes[Math.floor(Math.random() * fortunes.length)]); } }; useEffect(() => { fetchFortunes(); }, []);
   return (
     <div className="space-y-8">
       <section className="text-center py-8">
