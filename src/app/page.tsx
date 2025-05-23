@@ -27,6 +27,18 @@ export default function HomePage() {
     }
   };
 
+  const fetchAndSetFortune = async () => {
+    try {
+      const response = await fetch('/api/fortune');
+      const data = await response.json();
+      setFortunes(data);
+      if (data.length > 0) {
+        setCurrentFortune(data[Math.floor(Math.random() * data.length)]);
+      }
+    } catch (error) {
+      console.error('Error fetching fortune:', error);
+    }
+
   const generateNewFortune = () => {
     if (fortunes.length > 0) {
       setCurrentFortune(fortunes[Math.floor(Math.random() * fortunes.length)]);
