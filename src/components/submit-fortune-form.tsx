@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
-import { addFortune } from '@/lib/fortunes';
+// Removed direct import of addFortune: import { addFortune } from '@/lib/fortunes';
 
 interface SubmitFortuneFormProps {
   onSubmitSuccess?: (submittedFortune: string) => void;
@@ -30,22 +30,42 @@ export function SubmitFortuneForm({ onSubmitSuccess }: SubmitFortuneFormProps) {
     }
 
     setIsSubmitting(true);
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500)); 
-
     const trimmedFortune = newFortune.trim();
-    addFortune(trimmedFortune);
 
-    toast({
-      title: "Fortune Submitted!",
-      description: "It's now in the mix and you'll be redirected.",
-    });
+    try {
+      const response = await fetch('/api/fortune', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fortune: trimmedFortune }),
+      });
 
-    setNewFortune('');
-    setIsSubmitting(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit fortune');
+      }
 
-    onSubmitSuccess?.(trimmedFortune);
+      // const responseData = await response.json(); // Contains { message: '...', fortune: '...' }
+
+      toast({
+        title: "Fortune Submitted!",
+        description: "It's now in the mix and you'll be redirected.",
+      });
+
+      setNewFortune('');
+      onSubmitSuccess?.(trimmedFortune);
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      toast({
+        title: "Submission Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
