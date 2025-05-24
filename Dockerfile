@@ -1,63 +1,50 @@
-# Stage 1: Install dependencies
-FROM node:20-alpine AS deps
-# Install libc6-compat for compatibility, required by Next.js for some native modules.
-RUN apk add --no-cache libc6-compat
+# Stage 1: Build the Next.js application
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
-COPY package.json package-lock.json* ./
+# Set a default dummy API key for the build process if not overridden by a build argument.
+# This helps if libraries check for the key's presence during build-time initialization.
+ARG GOOGLE_API_KEY_ARG="DUMMY_KEY_FOR_BUILD_PROCESS_ONLY"
+ENV GOOGLE_API_KEY=$GOOGLE_API_KEY_ARG
 
-# Install production dependencies if using standalone output and copying node_modules later,
-# or install all dependencies if building everything in one go.
-# For Next.js standalone, it's better to build with all devDependencies.
-RUN npm install
+# Copy package.json and package-lock.json (or yarn.lock if you use Yarn)
+COPY package*.json ./
 
-# Stage 2: Build the Next.js application
-FROM node:20-alpine AS builder
-WORKDIR /app
-
-# Copy node_modules from the 'deps' stage
-COPY --from=deps /app/node_modules ./node_modules
+# Install dependencies
+# Using --legacy-peer-deps if there are peer dependency conflicts, otherwise remove it.
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application code
 COPY . .
 
-# Disable Next.js telemetry during the build
-ENV NEXT_TELEMETRY_DISABLED 1
-
 # Build the Next.js application
 RUN npm run build
 
-# Stage 3: Production image
-FROM node:20-alpine AS runner
+# Stage 2: Create the production image
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-# Disable Next.js telemetry during runtime
-ENV NEXT_TELEMETRY_DISABLED 1
-
 # Create a non-root user and group
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
 
-# Copy public assets
-COPY --from=builder /app/public ./public
-
-# Copy the standalone Next.js server files
-# The standalone output includes a minimal server and necessary node_modules.
+# Copy built assets from the builder stage with correct ownership
+# Copy the standalone Next.js server output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-# Copy static assets
+# Copy the public directory
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Copy the static assets (if any not handled by standalone, often needed)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Switch to the non-root user
+# Set user to non-root for security
 USER nextjs
 
-# Expose the port the app runs on
-EXPOSE 3000
+ENV NODE_ENV=production
+# EXPOSE 3000 # The server.js in standalone output handles this.
+ENV PORT=3000
 
-# Set the default port for the Next.js server
-ENV PORT 3000
+# Ensure server.js is executable (though typically Node doesn't require +x for the script itself)
+# RUN chmod +x server.js
 
 # Start the Next.js application
-# The standalone output creates a server.js file to run the app.
 CMD ["node", "server.js"]
