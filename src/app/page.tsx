@@ -30,7 +30,7 @@ export default function HomePage() {
       const mappedFortunes: Fortune[] = data.map((msg, index) => ({
         id: `api-fortune-${index}-${Date.now()}`,
         message: msg,
-        style: 'Classic Wisdom'
+        style: 'Classy Wisdom'
       }));
       setFortunes(mappedFortunes);
 
