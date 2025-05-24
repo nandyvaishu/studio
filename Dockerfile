@@ -1,52 +1,57 @@
-# Dockerfile
+# Stage 1: Install dependencies and build the Next.js application
+FROM node:20-alpine AS builder
 
-# Base image for consistent environment
-FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat
-RUN apk add --no-cache gcompat
-
-# Builder stage: Build the Next.js application
-FROM base AS builder
+# Set the working directory
 WORKDIR /app
 
-# Set GOOGLE_API_KEY to a dummy value for build-time if not provided
-ARG GOOGLE_API_KEY_ARG
-ENV GOOGLE_API_KEY=${GOOGLE_API_KEY_ARG:-"dummy_build_time_key"}
+# Set GOOGLE_API_KEY to a dummy value for build time if not provided
+ARG GOOGLE_API_KEY
+ENV GOOGLE_API_KEY=${GOOGLE_API_KEY:-dummy_key_for_build}
+ENV NEXT_TELEMETRY_DISABLED 1
 
-COPY package.json package-lock.json* ./
+# Copy package.json and package-lock.json (or yarn.lock)
+COPY package*.json ./
+
+# Install dependencies
+# Use --legacy-peer-deps if you encounter peer dependency issues
 RUN npm install --legacy-peer-deps
 
+# Copy the rest of the application source code
 COPY . .
+
+# Build the Next.js application
 RUN npm run build
 
-# Prune development dependencies
-RUN npm prune --production
+# Stage 2: Create the production image
+FROM node:20-alpine AS runner
 
-# Runner stage: Create a minimal image to run the application
-FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
 
 # Create a non-root user and group
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-USER nextjs
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
 
-# Copy only the necessary artifacts from the builder stage
-# This includes the .next/standalone directory which contains the server and minimal dependencies.
+# Copy the standalone Next.js server output from the builder stage
+# This includes the .next/static, .next/server and public directories (if they exist)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
-# The .next/standalone output should include the public and .next/static directories if they exist and are needed.
-# The following lines are removed as they are redundant with `COPY /app/.next/standalone ./`
-# and the /app/public copy was causing an error because the public directory might not exist in the source project.
-# COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-# COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# The standalone output might place the server.js file in the root of the standalone folder
+# or within a .next/server/app directory depending on the Next.js version and config.
+# The following lines are adjusted to ensure all necessary files from standalone are copied.
+
+# Change ownership of the app directory to the non-root user
+RUN chown -R nextjs:nodejs /app
+
+# Switch to the non-root user
+USER nextjs
 
 EXPOSE 3000
+
 ENV PORT 3000
 
-# The server.js file is created by `output: 'standalone'`
+# Start the Next.js application
+# The server.js file is expected to be in the root of the standalone output directory
 CMD ["node", "server.js"]
