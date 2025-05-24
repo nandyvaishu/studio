@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Fortune } from '@/app/page'; 
+import type { Fortune } from '@/types';
 import { CardDescription } from '@/components/ui/card';
 
 interface FortuneDisplayProps {
@@ -21,7 +21,6 @@ export function FortuneDisplay({ fortune }: FortuneDisplayProps) {
           Style: {fortune.style}
         </CardDescription>
       )}
-      {/* The Fortune Details Card has been removed from here */}
     </>
   );
 }
