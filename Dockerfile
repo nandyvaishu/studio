@@ -1,50 +1,52 @@
-# Stage 1: Build the Next.js application
-FROM node:18-alpine AS builder
+# Dockerfile
+
+# Base image for consistent environment
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache gcompat
+
+# Builder stage: Build the Next.js application
+FROM base AS builder
 WORKDIR /app
 
-# Set a default dummy API key for the build process if not overridden by a build argument.
-# This helps if libraries check for the key's presence during build-time initialization.
-ARG GOOGLE_API_KEY_ARG="DUMMY_KEY_FOR_BUILD_PROCESS_ONLY"
-ENV GOOGLE_API_KEY=$GOOGLE_API_KEY_ARG
+# Set GOOGLE_API_KEY to a dummy value for build-time if not provided
+ARG GOOGLE_API_KEY_ARG
+ENV GOOGLE_API_KEY=${GOOGLE_API_KEY_ARG:-"dummy_build_time_key"}
 
-# Copy package.json and package-lock.json (or yarn.lock if you use Yarn)
-COPY package*.json ./
-
-# Install dependencies
-# Using --legacy-peer-deps if there are peer dependency conflicts, otherwise remove it.
+COPY package.json package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the application code
 COPY . .
-
-# Build the Next.js application
 RUN npm run build
 
-# Stage 2: Create the production image
-FROM node:18-alpine AS runner
+# Prune development dependencies
+RUN npm prune --production
+
+# Runner stage: Create a minimal image to run the application
+FROM base AS runner
 WORKDIR /app
 
+ENV NODE_ENV=production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+# ENV NEXT_TELEMETRY_DISABLED 1
+
 # Create a non-root user and group
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
-
-# Copy built assets from the builder stage with correct ownership
-# Copy the standalone Next.js server output
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-# Copy the public directory
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-# Copy the static assets (if any not handled by standalone, often needed)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Set user to non-root for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 USER nextjs
 
-ENV NODE_ENV=production
-# EXPOSE 3000 # The server.js in standalone output handles this.
-ENV PORT=3000
+# Copy only the necessary artifacts from the builder stage
+# This includes the .next/standalone directory which contains the server and minimal dependencies.
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
-# Ensure server.js is executable (though typically Node doesn't require +x for the script itself)
-# RUN chmod +x server.js
+# The .next/standalone output should include the public and .next/static directories if they exist and are needed.
+# The following lines are removed as they are redundant with `COPY /app/.next/standalone ./`
+# and the /app/public copy was causing an error because the public directory might not exist in the source project.
+# COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Start the Next.js application
+EXPOSE 3000
+ENV PORT 3000
+
+# The server.js file is created by `output: 'standalone'`
 CMD ["node", "server.js"]
